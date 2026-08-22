@@ -37,14 +37,13 @@ fun PremiumScreen(
     val isPremium by viewModel.isPremium.collectAsState()
     val expiresAt by viewModel.premiumExpiresAt.collectAsState()
     var previewPaywall by remember { mutableStateOf(false) }
-    val showPaywall = !isPremium || previewPaywall
     val context = LocalContext.current
 
     var code by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
 
     val expiresText = remember(expiresAt) {
-        if (expiresAt == 0L) "Р‘РµСЃСЃСЂРѕС‡РЅРѕ"
+        if (expiresAt == 0L) "Бессрочно"
         else SimpleDateFormat("dd.MM.yyyy", Locale("ru")).format(Date(expiresAt))
     }
 
@@ -64,7 +63,7 @@ fun PremiumScreen(
                     IconButton(onClick = onBack) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "РќР°Р·Р°Рґ",
+                            contentDescription = "Назад",
                             tint = appColors.text
                         )
                     }
@@ -91,17 +90,17 @@ fun PremiumScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("в…", color = appColors.success, fontSize = 28.sp)
+                            Text("★", color = appColors.success, fontSize = 28.sp)
                             Spacer(modifier = Modifier.width(12.dp))
                             Column {
                                 Text(
-                                    "Premium Р°РєС‚РёРІРµРЅ",
+                                    "Premium активен",
                                     style = MaterialTheme.typography.titleLarge,
                                     color = appColors.success,
                                     fontWeight = FontWeight.Bold
                                 )
                                 Text(
-                                    "РЎРїР°СЃРёР±Рѕ Р·Р° РїРѕРґРґРµСЂР¶РєСѓ СЂР°Р·СЂР°Р±РѕС‚С‡РёРєР°!",
+                                    "Спасибо за поддержку разработчика!",
                                     color = appColors.text,
                                     style = MaterialTheme.typography.bodySmall
                                 )
@@ -112,11 +111,11 @@ fun PremiumScreen(
                         HorizontalDivider(color = appColors.success.copy(alpha = 0.3f))
                         Spacer(modifier = Modifier.height(12.dp))
 
-                        PremiumInfoRow("РЎС‚Р°С‚СѓСЃ", "РђРєС‚РёРІРµРЅ", appColors.success, appColors)
+                        PremiumInfoRow("Статус", "Активен", appColors.success, appColors)
                         Spacer(modifier = Modifier.height(8.dp))
-                        PremiumInfoRow("РЎРїРѕСЃРѕР±", "РљРѕРґ Р°РєС‚РёРІР°С†РёРё", appColors.text, appColors)
+                        PremiumInfoRow("Способ", "Код активации", appColors.text, appColors)
                         Spacer(modifier = Modifier.height(8.dp))
-                        PremiumInfoRow("Р”РµР№СЃС‚РІСѓРµС‚ РґРѕ", expiresText, appColors.text, appColors)
+                        PremiumInfoRow("Действует до", expiresText, appColors.text, appColors)
                     }
                 }
 
@@ -127,19 +126,19 @@ fun PremiumScreen(
                 ) {
                     Icon(Icons.Outlined.ShoppingCart, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text("РљСѓРїРёС‚СЊ РєРѕРґ РІ РїРѕРґР°СЂРѕРє вЂ” 399 в‚Ѕ")
+                    Text("Купить код в подарок — 399 ₽")
                 }
 
                 TextButton(
                     onClick = { previewPaywall = true },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    Text("РџСЂРµРґРїСЂРѕСЃРјРѕС‚СЂ СЌРєСЂР°РЅР° РїРѕРєСѓРїРєРё", color = appColors.textSecondary)
+                    Text("Предпросмотр экрана покупки", color = appColors.textSecondary)
                 }
             } else {
                 if (isPremium) {
                     TextButton(onClick = { previewPaywall = false }) {
-                        Text("в†ђ Р’РµСЂРЅСѓС‚СЊСЃСЏ Рє СЃС‚Р°С‚СѓСЃСѓ", color = appColors.textSecondary)
+                        Text("← Вернуться к статусу", color = appColors.textSecondary)
                     }
                 }
 
@@ -164,13 +163,13 @@ fun PremiumScreen(
                     colors = CardDefaults.cardColors(containerColor = appColors.surface)
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
-                        PremiumFeature("4 СЌРєСЃРєР»СЋР·РёРІРЅС‹Рµ С‚РµРјС‹: РћРєРµР°РЅ, Р—Р°РєР°С‚, Р›РµСЃ, РњРѕРЅРѕС…СЂРѕРј", appColors)
+                        PremiumFeature("4 эксклюзивные темы: Океан, Закат, Лес, Монохром", appColors)
                         Spacer(modifier = Modifier.height(10.dp))
-                        PremiumFeature("Р¤РѕРЅРѕРІС‹Рµ Р·РІСѓРєРё РґР»СЏ С„РѕРєСѓСЃР°: Р±РµР»С‹Р№, СЂРѕР·РѕРІС‹Р№, РіР»СѓР±РѕРєРёР№ С€СѓРј", appColors)
+                        PremiumFeature("Фоновые звуки для фокуса: белый, розовый, глубокий шум", appColors)
                         Spacer(modifier = Modifier.height(10.dp))
-                        PremiumFeature("РђРІС‚Рѕ-С‚РµРјР° РїРѕ РІСЂРµРјРµРЅРё СЃСѓС‚РѕРє (РїРѕСЏРІРёС‚СЃСЏ РІ РѕР±РЅРѕРІР»РµРЅРёРё)", appColors)
+                        PremiumFeature("Авто-тема по времени суток (появится в обновлении)", appColors)
                         Spacer(modifier = Modifier.height(10.dp))
-                        PremiumFeature("РџРѕРґРґРµСЂР¶РєР° СЂР°Р·РІРёС‚РёСЏ РїСЂРёР»РѕР¶РµРЅРёСЏ", appColors)
+                        PremiumFeature("Поддержка развития приложения", appColors)
                     }
                 }
 
@@ -188,14 +187,14 @@ fun PremiumScreen(
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Text(
-                        "РљСѓРїРёС‚СЊ РєРѕРґ Р·Р° 399 в‚Ѕ",
+                        "Купить код за 399 ₽",
                         color = if (appColors.mode == "dark") appColors.bg else androidx.compose.ui.graphics.Color.White,
                         fontWeight = FontWeight.Bold
                     )
                 }
 
                 Text(
-                    "РћРїР»Р°С‚Р° С‡РµСЂРµР· РЎР‘Рџ РёР»Рё РєР°СЂС‚Сѓ. РљРѕРґ РІС‹РґР°С‘С‚СЃСЏ СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ РѕРїР»Р°С‚С‹.",
+                    "Оплата через СБП или карту. Код выдаётся сразу после оплаты.",
                     style = MaterialTheme.typography.bodySmall,
                     color = appColors.textSecondary
                 )
@@ -203,7 +202,7 @@ fun PremiumScreen(
                 HorizontalDivider(color = appColors.surface2)
 
                 Text(
-                    "РЈ РјРµРЅСЏ РµСЃС‚СЊ РєРѕРґ",
+                    "У меня есть код",
                     style = MaterialTheme.typography.titleMedium,
                     color = appColors.text,
                     fontWeight = FontWeight.Medium
@@ -228,7 +227,7 @@ fun PremiumScreen(
 
                 if (error) {
                     Text(
-                        "РќРµРІРµСЂРЅС‹Р№ РєРѕРґ Р°РєС‚РёРІР°С†РёРё",
+                        "Неверный код активации",
                         color = appColors.error,
                         style = MaterialTheme.typography.bodySmall
                     )
@@ -249,7 +248,7 @@ fun PremiumScreen(
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = appColors.surface2)
                 ) {
-                    Text("РђРєС‚РёРІРёСЂРѕРІР°С‚СЊ", color = appColors.text, fontWeight = FontWeight.Bold)
+                    Text("Активировать", color = appColors.text, fontWeight = FontWeight.Bold)
                 }
 
                 Card(
@@ -257,7 +256,7 @@ fun PremiumScreen(
                     colors = CardDefaults.cardColors(containerColor = appColors.surface)
                 ) {
                     Text(
-                        "РљСѓРїРёР»Рё СЂР°РЅРµРµ? РљРѕРґ Р°РєС‚РёРІР°С†РёРё СЃРѕС…СЂР°РЅС‘РЅ РІ РїРёСЃСЊРјРµ РѕР± РѕРїР»Р°С‚Рµ Рё РІ С‡РµРєРµ вЂ” РІРІРµРґРёС‚Рµ РµРіРѕ СЃРЅРѕРІР° РІ РїРѕР»Рµ РІС‹С€Рµ.",
+                        "Купили ранее? Код активации сохранён в письме об оплате и в чеке — введите его снова в поле выше.",
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodySmall,
                         color = appColors.textSecondary
