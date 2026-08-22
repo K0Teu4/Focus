@@ -1,4 +1,4 @@
-package com.example.focusflow.ui
+﻿package com.example.focusflow.ui
 
 import android.content.Intent
 import android.net.Uri
@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.focusflow.ui.theme.AppColors
@@ -82,39 +83,42 @@ fun PremiumScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             if (isPremium && !previewPaywall) {
+                // ===== СТАТУС PREMIUM — ЦЕНТРОВАН =====
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
                         containerColor = appColors.success.copy(alpha = 0.15f)
                     )
                 ) {
-                    Column(modifier = Modifier.padding(20.dp)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text("★", color = appColors.success, fontSize = 28.sp)
-                            Spacer(modifier = Modifier.width(12.dp))
-                            Column {
-                                Text(
-                                    "Premium активен",
-                                    style = MaterialTheme.typography.titleLarge,
-                                    color = appColors.success,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    "Спасибо за поддержку разработчика!",
-                                    color = appColors.text,
-                                    style = MaterialTheme.typography.bodySmall
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-                        HorizontalDivider(color = appColors.success.copy(alpha = 0.3f))
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text("★", color = appColors.success, fontSize = 48.sp)
                         Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            "Premium активен",
+                            style = MaterialTheme.typography.headlineSmall,
+                            color = appColors.success,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "Спасибо за поддержку разработчика!",
+                            color = appColors.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center
+                        )
+
+                        Spacer(modifier = Modifier.height(20.dp))
+                        HorizontalDivider(color = appColors.success.copy(alpha = 0.3f))
+                        Spacer(modifier = Modifier.height(16.dp))
 
                         PremiumInfoRow("Статус", "Активен", appColors.success, appColors)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         PremiumInfoRow("Способ", "Код активации", appColors.text, appColors)
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         PremiumInfoRow("Действует до", expiresText, appColors.text, appColors)
                     }
                 }
@@ -136,6 +140,7 @@ fun PremiumScreen(
                     Text("Предпросмотр экрана покупки", color = appColors.textSecondary)
                 }
             } else {
+                // ===== PAYWALL =====
                 if (isPremium) {
                     TextButton(onClick = { previewPaywall = false }) {
                         Text("← Вернуться к статусу", color = appColors.textSecondary)
@@ -147,14 +152,22 @@ fun PremiumScreen(
                         Icons.Outlined.Palette,
                         contentDescription = null,
                         tint = appColors.primary,
-                        modifier = Modifier.size(64.dp)
+                        modifier = Modifier.size(72.dp)
                     )
-                    Spacer(modifier = Modifier.height(12.dp))
+                    Spacer(modifier = Modifier.height(16.dp))
                     Text(
                         "FocusFlow Premium",
                         style = MaterialTheme.typography.headlineMedium,
                         color = appColors.text,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "Разблокируйте все возможности приложения",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = appColors.textSecondary,
+                        textAlign = TextAlign.Center
                     )
                 }
 
@@ -164,20 +177,21 @@ fun PremiumScreen(
                 ) {
                     Column(modifier = Modifier.padding(20.dp)) {
                         PremiumFeature("4 эксклюзивные темы: Океан, Закат, Лес, Монохром", appColors)
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         PremiumFeature("Фоновые звуки для фокуса: белый, розовый, глубокий шум", appColors)
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         PremiumFeature("Авто-тема по времени суток (появится в обновлении)", appColors)
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(12.dp))
                         PremiumFeature("Поддержка развития приложения", appColors)
                     }
                 }
 
+                // Кнопка покупки
                 Button(
                     onClick = openShop,
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = appColors.primary),
-                    contentPadding = PaddingValues(vertical = 14.dp)
+                    contentPadding = PaddingValues(vertical = 16.dp)
                 ) {
                     Icon(
                         Icons.Outlined.ShoppingCart,
@@ -189,14 +203,17 @@ fun PremiumScreen(
                     Text(
                         "Купить код за 399 ₽",
                         color = if (appColors.mode == "dark") appColors.bg else androidx.compose.ui.graphics.Color.White,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
                     )
                 }
 
                 Text(
                     "Оплата через СБП или карту. Код выдаётся сразу после оплаты.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = appColors.textSecondary
+                    color = appColors.textSecondary,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 HorizontalDivider(color = appColors.surface2)
@@ -274,8 +291,8 @@ private fun PremiumInfoRow(label: String, value: String, valueColor: androidx.co
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(label, color = appColors.textSecondary, style = MaterialTheme.typography.bodyMedium)
-        Text(value, color = valueColor, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+        Text(label, color = appColors.textSecondary, style = MaterialTheme.typography.bodyLarge)
+        Text(value, color = valueColor, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
     }
 }
 
@@ -288,7 +305,7 @@ private fun PremiumFeature(text: String, appColors: AppColors) {
             tint = appColors.success,
             modifier = Modifier.size(20.dp)
         )
-        Spacer(modifier = Modifier.width(10.dp))
+        Spacer(modifier = Modifier.width(12.dp))
         Text(text, color = appColors.text, style = MaterialTheme.typography.bodyMedium)
     }
 }

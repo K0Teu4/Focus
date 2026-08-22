@@ -1,4 +1,4 @@
-package com.example.focusflow.ui
+﻿package com.example.focusflow.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -15,17 +15,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.focusflow.ui.theme.AppColors
 import com.example.focusflow.utils.CatAchievement
 import com.example.focusflow.utils.CatGarden
 import com.example.focusflow.utils.GardenStats
 import com.example.focusflow.viewmodel.StatsViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,16 +37,22 @@ fun CatGardenScreen(
 ) {
     val state by statsViewModel.state.collectAsState()
     var selected by remember { mutableStateOf<CatAchievement?>(null) }
-
+    
     val stats = GardenStats(
         pomodoros = state.completedPomodoros,
         streak = state.streak,
         focusMinutes = state.focusMinutes,
-        tasksDone = state.tasksDone
+        tasksDone = state.tasksDone,
+        earlyBirds = state.earlyBirds,
+        nightOwls = state.nightOwls,
+        deepFocusCount = state.deepFocusCount
     )
+    
     val unlocked = CatGarden.unlockedCount(stats)
     val total = CatGarden.achievements.size
     val nearest = remember(stats) { CatGarden.nearest(stats) }
+    val dailyGoal = 4 // можно вынести в настройки
+    val catMood = CatGarden.catMood(state.pomodorosToday, dailyGoal)
 
     // Диалог с деталями достижения
     selected?.let { a ->
@@ -60,7 +67,7 @@ fun CatGardenScreen(
                     Spacer(modifier = Modifier.height(12.dp))
                     Text(
                         if (isUnlocked) "✓ Открыто!"
-                        else "Прогресс: ${a.progress(stats)}/${a.threshold} ${a.unitLabel()}",
+                        else "Прогресс: /",
                         color = if (isUnlocked) appColors.success else appColors.primary,
                         fontWeight = FontWeight.Bold
                     )
@@ -99,6 +106,107 @@ fun CatGardenScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            // 🐱 Настроение кота
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = appColors.surface)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        catMood,
+                        fontSize = 64.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        when (catMood) {
+                            "😿" -> "Кот голодный — начни фокус!"
+                            "😺" -> "Кот доволен — так держать!"
+                            "😻" -> "Кот счастлив — цель дня достигнута!"
+                            else -> "Кот отдыхает"
+                        },
+                        color = appColors.text,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Text(
+                        "Сегодня:  /  🍅",
+                        color = appColors.textSecondary,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            // 🐾 Полка с котами
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = appColors.surface)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            "🐾 Моя полка",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = appColors.text,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Text(
+                            "/",
+                            color = appColors.primary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // Сетка котов 5 колонок
+                    val unlockedCats = CatGarden.achievements.filter { it.isUnlocked(stats) }
+                    val columns = 5
+                    
+                    for (row in unlockedCats.chunked(columns)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            row.forEach { cat ->
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .aspectRatio(1f)
+                                        .clip(CircleShape)
+                                        .background(appColors.primary.copy(alpha = 0.2f))
+                                        .clickable { selected = cat },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(cat.emoji, fontSize = 28.sp)
+                                }
+                            }
+                            // Заполнение пустых ячеек
+                            repeat(columns - row.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    
+                    if (unlockedCats.isEmpty()) {
+                        Text(
+                            "Пока нет котов — начни фокус!",
+                            color = appColors.textSecondary,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
+
             // Прогресс сада
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,15 +225,13 @@ fun CatGardenScreen(
                             fontWeight = FontWeight.Bold
                         )
                         Text(
-                            "$unlocked/$total 🐾",
+                            "/ 🐾",
                             color = appColors.primary,
                             style = MaterialTheme.typography.bodyMedium,
                             fontWeight = FontWeight.Bold
                         )
                     }
-
                     Spacer(modifier = Modifier.height(12.dp))
-
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
                         modifier = Modifier.fillMaxWidth()
@@ -141,9 +247,7 @@ fun CatGardenScreen(
                         StatPill("⏰", formatHours(stats.focusMinutes), "Фокуса", Modifier.weight(1f), appColors)
                         StatPill("✅", stats.tasksDone.toString(), "Задач", Modifier.weight(1f), appColors)
                     }
-
                     Spacer(modifier = Modifier.height(16.dp))
-
                     if (nearest != null) {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -151,7 +255,7 @@ fun CatGardenScreen(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                "Ближайший: ${nearest.emoji} ${nearest.name}",
+                                "Ближайший: ",
                                 color = appColors.text,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Medium,
@@ -160,7 +264,7 @@ fun CatGardenScreen(
                                 overflow = TextOverflow.Ellipsis
                             )
                             Text(
-                                "+${nearest.threshold - nearest.progress(stats)} ${nearest.unitLabel()}",
+                                "+",
                                 color = appColors.primary,
                                 style = MaterialTheme.typography.bodyMedium,
                                 fontWeight = FontWeight.Bold
@@ -220,6 +324,30 @@ fun CatGardenScreen(
                 appColors = appColors
             )
 
+            GardenSection(
+                title = "🌅 Ранние пташки",
+                achievements = CatGarden.achievements.filter { it.kind == CatAchievement.Kind.EARLY_BIRDS },
+                stats = stats,
+                onAchievementClick = { selected = it },
+                appColors = appColors
+            )
+
+            GardenSection(
+                title = "🌙 Ночные совы",
+                achievements = CatGarden.achievements.filter { it.kind == CatAchievement.Kind.NIGHT_OWLS },
+                stats = stats,
+                onAchievementClick = { selected = it },
+                appColors = appColors
+            )
+
+            GardenSection(
+                title = "🧘 Чистый фокус",
+                achievements = CatGarden.achievements.filter { it.kind == CatAchievement.Kind.DEEP_FOCUS },
+                stats = stats,
+                onAchievementClick = { selected = it },
+                appColors = appColors
+            )
+
             Text(
                 "🐱 Каждый помидор кормит кота, каждая серия растит сад. Тапни по коту — узнай его историю!",
                 color = appColors.textSecondary,
@@ -232,7 +360,7 @@ fun CatGardenScreen(
 }
 
 private fun formatHours(minutes: Int): String =
-    if (minutes >= 60) "${minutes / 60} ч ${minutes % 60} м" else "$minutes мин"
+    if (minutes >= 60) " ч  м" else " мин"
 
 @Composable
 private fun StatPill(
@@ -311,7 +439,6 @@ private fun AchievementBig(
     appColors: AppColors
 ) {
     val unlocked = a.isUnlocked(stats)
-
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -345,7 +472,7 @@ private fun AchievementBig(
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            if (unlocked) "✓" else "${a.progress(stats)}/${a.threshold}",
+            if (unlocked) "✓" else "/",
             fontSize = 10.sp,
             color = if (unlocked) appColors.success else appColors.textSecondary,
             maxLines = 1,

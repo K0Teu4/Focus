@@ -1,4 +1,4 @@
-package com.example.focusflow.viewmodel
+﻿package com.example.focusflow.viewmodel
 
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
@@ -34,6 +34,10 @@ data class StatsState(
     val completedPomodoros: Int = 0,
     val focusMinutes: Int = 0,
     val tasksDone: Int = 0,
+    val earlyBirds: Int = 0,
+    val nightOwls: Int = 0,
+    val deepFocusCount: Int = 0,
+    val pomodorosToday: Int = 0,
     val weekActivity: List<DailyActivity> = emptyList(),
     val recentSessions: List<SessionEntity> = emptyList(),
     val taskTitles: Map<Long, String> = emptyMap(),
@@ -87,6 +91,25 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             val tasksDone = db.taskDao().getAllTasks().first().count { it.isDone }
+        
+        // Подсчёт ранних/ночных сессий и чистого фокуса
+        val earlyBirds = workSessions.count { s ->
+            val hour = Calendar.getInstance().apply { timeInMillis = s.startedAt }.get(Calendar.HOUR_OF_DAY)
+            hour < 7
+        }
+        val nightOwls = workSessions.count { s ->
+            val hour = Calendar.getInstance().apply { timeInMillis = s.startedAt }.get(Calendar.HOUR_OF_DAY)
+            hour >= 23
+        }
+        val deepFocusCount = workSessions.count { it.isCompleted }
+        
+        // Помидоров сегодня
+        val todayCal = Calendar.getInstance()
+        todayCal.set(Calendar.HOUR_OF_DAY, 0)
+        todayCal.set(Calendar.MINUTE, 0)
+        todayCal.set(Calendar.SECOND, 0)
+        todayCal.set(Calendar.MILLISECOND, 0)
+        val pomodorosToday = workSessions.count { it.startedAt >= todayCal.timeInMillis }
 
             val calendar = Calendar.getInstance()
             calendar.add(Calendar.DAY_OF_YEAR, -89)
@@ -164,14 +187,18 @@ class StatsViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             _state.value = StatsState(
-                streak = streak,
-                bestDay = "${fmtMin(bestDay)} мин",
-                avgPerDay = "${fmtMin(avg)} мин",
-                totalTime = totalTime,
-                totalSessions = workSessions.size,
-                completedPomodoros = completedPomodoros,
-                focusMinutes = focusMinutes,
-                tasksDone = tasksDone,
+            streak = streak,
+            bestDay = "${fmtMin(bestDay)} мин",
+            avgPerDay = "${fmtMin(avg)} мин",
+            totalTime = totalTime,
+            totalSessions = workSessions.size,
+            completedPomodoros = completedPomodoros,
+            focusMinutes = focusMinutes,
+            tasksDone = tasksDone,
+            earlyBirds = earlyBirds,
+            nightOwls = nightOwls,
+            deepFocusCount = deepFocusCount,
+            pomodorosToday = pomodorosToday,
                 weekActivity = weekActivity,
                 recentSessions = allSessions.take(50),
                 taskTitles = taskTitles,
