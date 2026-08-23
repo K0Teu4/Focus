@@ -225,7 +225,10 @@ fun MainScreen(appColors: AppColors, viewModel: TimerViewModel = viewModel()) {
                         appColors = appColors,
                         onOpenCatGarden = onOpenCatGarden
                     )
-                    3 -> SettingsScreen(onBackClick = { selectedTab = 0 }, onOpenPremium = onOpenPremium)
+                    3 -> SettingsScreen(
+                    onBackClick = { selectedTab = 0 },
+                    onOpenPremium = onOpenPremium
+                )
                 }
             }
         }
