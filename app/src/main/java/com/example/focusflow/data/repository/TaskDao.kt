@@ -51,4 +51,7 @@ interface SessionDao {
 
     @Query("SELECT SUM(durationSec) FROM pomodoro_sessions WHERE type = 'work' AND isCompleted = 1")
     suspend fun getTotalWorkSeconds(): Int
+
+    @Query("DELETE FROM pomodoro_sessions")
+    suspend fun deleteAllSessions()
 }

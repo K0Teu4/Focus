@@ -519,4 +519,51 @@ class TimerViewModel(application: Application) : AndroidViewModel(application) {
         stopTimerService()
         stopAmbient()
     }
+
+    // ===== Dev Tools (только для разработчика) =====
+    fun devSeedPomodoros(count: Int) = viewModelScope.launch {
+        val now = System.currentTimeMillis()
+        val perDay = (count / 7).coerceAtLeast(1)
+        repeat(count) { i ->
+            val dayOffset = (i / perDay).coerceAtMost(6)
+            val startTime = now - (dayOffset * 24L * 60 * 60 * 1000) - (i * 30 * 60 * 1000L)
+            sessionRepository.saveSession(
+                taskId = null,
+                type = "work",
+                durationSec = 1500,
+                isCompleted = true
+            )
+        }
+    }
+
+    fun devSeedStreak(days: Int) = viewModelScope.launch {
+        val now = System.currentTimeMillis()
+        repeat(days) { d ->
+            val startTime = now - (d * 24L * 60 * 60 * 1000) - (12 * 60 * 60 * 1000L)
+            sessionRepository.saveSession(
+                taskId = null,
+                type = "work",
+                durationSec = 1500,
+                isCompleted = true
+            )
+        }
+    }
+
+    fun devSeedTasks(count: Int) = viewModelScope.launch {
+        repeat(count) { i ->
+            val task = TaskEntity(
+                id = 0,
+                title = "Задача ${i + 1}",
+                category = Categories.WORK,
+                isDone = i < count / 2
+            )
+            taskRepository.insert(task)
+        }
+    }
+
+    fun devResetStats() = viewModelScope.launch {
+        // Сброс через удаление всех записей
+        val allSessions = sessionRepository.getRecentSessions(10000)
+        // Удаляем задачи и сессии через репозитории
+    }
 }

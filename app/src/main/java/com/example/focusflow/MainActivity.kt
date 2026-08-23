@@ -70,6 +70,8 @@ import com.example.focusflow.viewmodel.TimerViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 import com.example.focusflow.ui.RatingPrompt
+import com.example.focusflow.ui.DevToolsScreen
+import com.example.focusflow.BuildConfig
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,6 +114,7 @@ fun MainScreen(appColors: AppColors, viewModel: TimerViewModel = viewModel()) {
     var showPremium by remember { mutableStateOf(false) }
     var showFocusMode by remember { mutableStateOf(false) }
     var showCatGarden by remember { mutableStateOf(false) }
+    var showDevTools by remember { mutableStateOf(false) }
 
     val onOpenTaskPicker: () -> Unit = remember { { showTaskPicker = true } }
     val onOpenPremium: () -> Unit = remember { { showPremium = true } }
@@ -162,6 +165,10 @@ fun MainScreen(appColors: AppColors, viewModel: TimerViewModel = viewModel()) {
         }
     }
 
+    if (showDevTools) {
+        DevToolsScreen(onBack = { showDevTools = false }, appColors = appColors)
+        return
+    }
     if (showCatGarden) {
         CatGardenScreen(onBack = { showCatGarden = false }, appColors = appColors)
         return
@@ -242,7 +249,17 @@ fun MainScreen(appColors: AppColors, viewModel: TimerViewModel = viewModel()) {
                 .padding(horizontal = 16.dp, vertical = 8.dp)
         )
 
-        RatingPrompt(
+        if (BuildConfig.DEBUG) {
+        FloatingActionButton(
+            onClick = { showDevTools = true },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(end = 16.dp, bottom = 96.dp),
+            containerColor = appColors.surface2,
+            contentColor = appColors.text
+        ) { Text("🛠") }
+    }
+    RatingPrompt(
             completedPomodoros = timerState.completedPomodoros,
             appColors = appColors
         )
