@@ -11,6 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.example.focusflow.MainActivity
 import com.example.focusflow.R
+import com.example.focusflow.widget.TimerWidgetUpdater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -27,12 +28,10 @@ object TimerNotificationHub {
     val totalSeconds = MutableStateFlow(1)
     val isRunning = MutableStateFlow(false)
     val sessionLabel = MutableStateFlow("Фокус")
-
     var actionListener: ((String) -> Unit)? = null
 }
 
 class TimerService : Service() {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
 
     override fun onBind(intent: Intent?): IBinder? = null
@@ -47,6 +46,7 @@ class TimerService : Service() {
             running = TimerNotificationHub.isRunning.value,
             label = TimerNotificationHub.sessionLabel.value
         )
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             startForeground(
                 NOTIFICATION_ID,
@@ -71,6 +71,18 @@ class TimerService : Service() {
                     .notify(NOTIFICATION_ID, notification)
             }
         }
+
+        // Живое обновление виджета на главном экране
+        scope.launch {
+            combine(
+                TimerNotificationHub.remainingSeconds,
+                TimerNotificationHub.totalSeconds,
+                TimerNotificationHub.isRunning,
+                TimerNotificationHub.sessionLabel
+            ) { remaining, total, running, label ->
+                TimerWidgetUpdater.update(this@TimerService, remaining, total, running, label)
+            }.collect { }
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -82,6 +94,7 @@ class TimerService : Service() {
     }
 
     override fun onDestroy() {
+        TimerWidgetUpdater.updateIdle(this)
         scope.cancel()
         super.onDestroy()
     }
@@ -112,11 +125,13 @@ class TimerService : Service() {
             Intent(this, MainActivity::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
         val toggleIntent = PendingIntent.getService(
             this, 1,
             Intent(this, TimerService::class.java).apply { action = ACTION_TOGGLE },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+
         val skipIntent = PendingIntent.getService(
             this, 2,
             Intent(this, TimerService::class.java).apply { action = ACTION_SKIP },

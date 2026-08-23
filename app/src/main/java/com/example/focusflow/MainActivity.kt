@@ -1,4 +1,4 @@
-﻿package com.example.focusflow
+package com.example.focusflow
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -282,6 +282,11 @@ fun MainScreen(appColors: AppColors, viewModel: TimerViewModel = viewModel()) {
                 .align(Alignment.TopCenter)
                 .statusBarsPadding()
                 .padding(horizontal = 16.dp, vertical = 8.dp)
+        )
+
+        RatingPrompt(
+            completedPomodoros = timerState.completedPomodoros,
+            appColors = appColors
         )
     }
 }
