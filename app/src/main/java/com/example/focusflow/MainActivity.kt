@@ -1,4 +1,7 @@
 package com.example.focusflow
+import kotlinx.coroutines.delay
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.runtime.LaunchedEffect
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -66,6 +69,7 @@ import com.example.focusflow.viewmodel.TimerState
 import com.example.focusflow.viewmodel.TimerViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
+import com.example.focusflow.ui.RatingPrompt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,55 +96,6 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun TopSnackbar(
-    hostState: SnackbarHostState,
-    appColors: AppColors,
-    modifier: Modifier = Modifier
-) {
-    val data = hostState.currentSnackbarData
-    var lastData by remember { mutableStateOf<SnackbarData?>(null) }
-    if (data != null) lastData = data
-
-    AnimatedVisibility(
-        visible = data != null,
-        enter = fadeIn(tween(200)) + slideInVertically(tween(200)) { -it },
-        exit = fadeOut(tween(150)) + slideOutVertically(tween(150)) { -it },
-        modifier = modifier
-    ) {
-        val d = lastData
-        if (d != null) {
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = appColors.surface2,
-                shadowElevation = 6.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { d.dismiss() }
-            ) {
-                Row(
-                    modifier = Modifier.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        d.visuals.message,
-                        color = appColors.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.weight(1f)
-                    )
-                    d.visuals.actionLabel?.let { label ->
-                        TextButton(onClick = { d.performAction() }) {
-                            Text(label, color = appColors.primary, fontWeight = FontWeight.Bold)
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -1035,6 +990,55 @@ private fun TaskItemRow(
                     DropdownMenuItem(
                         text = { Text("Удалить", color = appColors.error) },
                         onClick = { onDelete(); showMenu = false })
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun TopSnackbar(
+    hostState: SnackbarHostState,
+    appColors: AppColors,
+    modifier: Modifier = Modifier
+) {
+    val data = hostState.currentSnackbarData
+
+    LaunchedEffect(data) {
+        if (data != null) {
+            delay(4000)
+            data.dismiss()
+        }
+    }
+
+    if (data != null) {
+        Surface(
+            modifier = modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            color = appColors.surface,
+            shadowElevation = 8.dp
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = data.visuals.message,
+                    color = appColors.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
+                    onClick = { data.dismiss() },
+                    modifier = Modifier.size(28.dp)
+                ) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = "Закрыть",
+                        tint = appColors.textSecondary,
+                        modifier = Modifier.size(16.dp)
+                    )
                 }
             }
         }
